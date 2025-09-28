@@ -1,0 +1,28 @@
+<section class="wrap">
+  <h2>In build...</h2>
+
+  <div *ngIf="loading" class="loading">Ładowanie…</div>
+
+  <div *ngIf="!loading && data" class="grid">
+    <article class="tile">
+      <h3>Kroki</h3>
+      <p class="val">{{ data!.steps.value ?? 0 }} / {{ data!.steps.goal ?? '—' }} {{ data!.steps.unit }}</p>
+    </article>
+
+    <article class="tile">
+      <h3>Woda</h3>
+      <p class="val">{{ data!.water.value ?? 0 }} / {{ data!.water.goal ?? '—' }} {{ data!.water.unit }}</p>
+      <div class="bar"><span [style.width.%]="pct(data!.water.value, data!.water.goal)"></span></div>
+    </article>
+
+    <article class="tile">
+      <h3>Sen</h3>
+      <p class="val">{{ data!.sleep.value ?? 0 }} / {{ data!.sleep.goal ?? '—' }} {{ data!.sleep.unit }}</p>
+    </article>
+
+    <article class="tile">
+      <h3>Nastrój</h3>
+      <p class="val">{{ data!.mood.value ?? '—' }}</p>
+    </article>
+  </div>
+</section>

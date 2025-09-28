@@ -1,0 +1,13 @@
+.wrap{width:min(1100px,92%);margin:24px auto}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+.tile{
+  background:#fff;border:1px solid #e8eef7;border-radius:14px;padding:16px;
+  box-shadow:0 8px 24px rgba(20,35,60,.06)
+}
+.tile h3{margin:0 0 6px}
+.val{margin:0 0 8px;font-weight:700}
+.bar{height:8px;background:#f1f5f9;border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,#7c4dff,#2ec9b5)}
+.loading{opacity:.7}

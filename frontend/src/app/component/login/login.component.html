@@ -1,0 +1,166 @@
+<header class="nav">
+  <div class="container">
+    <div class="nav-left">
+      <a class="brand" routerLink="/" aria-label="CareHub">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Healthcare Poland</span>
+      </a>
+
+      <nav class="sections" *ngIf="isLoggedIn" aria-label="Sekcje">
+        <!-- Section A -->
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section A</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-a/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-a/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-a/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-a/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-a/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <!-- Section B-->
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section B</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-b/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-b/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-b/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-b/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-b/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <!-- Section C -->
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section C</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-c/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-c/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-c/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-c/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-c/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <!-- Section D -->
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section D</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-d/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-d/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-d/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-d/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-d/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <nav class="links" aria-label="Main navigation">
+        <a href="#streams">Value Streams</a>
+        <a href="#about">O projekcie</a>
+        <a href="#contact">Kontakt</a>
+      </nav>
+
+      <button *ngIf="!isLoggedIn" class="cta" (click)="toggleLogin()">Start now</button>
+
+      <div *ngIf="isLoggedIn" class="auth-actions" role="group" aria-label="Acctions account">
+        <button class="link" type="button" (click)="openProfile()">Profile</button>
+        <button class="link danger" type="button" (click)="logout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="login" role="banner" aria-label="Login screen">
+  <div class="login-actions" *ngIf="showLogin && !isLoggedIn" role="group" aria-label="Login">
+    <a class="btn btn-sm outline" href="/oauth2/authorization/github" aria-label="Login via GitHub" (click)="persistIntent()">
+      <img src="/assets/icons/github.svg" alt="" /> Login via GitHub
+    </a>
+    <a class="btn btn-sm primary" href="/oauth2/authorization/google" aria-label="Login via Google" (click)="persistIntent()">
+      <img src="/assets/icons/google.svg" alt="" /> Login via Google
+    </a>
+  </div>
+
+  <div class="container hero-grid">
+    <div class="copy">
+      <h1>
+        We are the international gateway to
+        <span>healthcare & life science</span> in Poland
+      </h1>
+
+      <p class="lead">
+        CareHub is a secure platform that integrates patients, clinics, and specialists.
+        All in one place: appointments, treatment history, documentation, medication
+        schedules, and smart reminders. Log in via <b>Google</b> lub <b>GitHub</b> –
+        with compliance standards OAuth&nbsp;2.0.
+      </p>
+    </div>
+
+    <aside class="card" aria-label="Benefits">
+      <h3>What will you gain?</h3>
+      <ul>
+        <li>🩺 Quickly arrange appointments and teleconsultations</li>
+        <li>💊 Medication schedule with reminders</li>
+        <li>📄 Secure storage of results and referrals</li>
+        <li>👨‍⚕️ Sharing data with your doctor</li>
+      </ul>
+      <div class="secure">
+        <span class="dot" aria-hidden="true"></span>
+        Encrypted connection • OAuth 2.0
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- About Project -->
+<section id="about" class="about">
+  <div class="container">
+    <h2>O projekcie CareHub</h2>
+    <p>
+      CareHub was created to improve communication between patient, doctor and facility.
+      We combine best healthcare practices and modern standards security.
+      Our platform allows you to aggregate medical data from multiple sources,
+      and then presents them in a clear and understandable form.
+    </p>
+
+    <div class="grid">
+      <article>
+        <h3>Interoperability</h3>
+        <p>HL7/FHIR compliant data exchange and integration with branch systems.</p>
+      </article>
+      <article>
+        <h3>Patient at the center</h3>
+        <p>A clear dashboard, your own notes, medication and appointment reminders.</p>
+      </article>
+      <article>
+        <h3>Security</h3>
+        <p>Encryption at rest and in transit, federated login, auditing.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Value Streams -->
+<section id="streams" class="streams">
+  <div class="container">
+    <h2>Value Streams</h2>
+    <div class="pill-row">
+      <span class="pill">Digital Triage</span>
+      <span class="pill">Medication Adherence</span>
+      <span class="pill">Patient Journey</span>
+      <span class="pill">Data Insights</span>
+    </div>
+  </div>
+</section>
+
+<!-- Stopka -->
+<footer id="contact" class="footer">
+  <div class="container">
+    <p>© {{ currentYear }} CareHub • Demo version</p>
+    <a href="mailto:contact@carehub.local">contact&#64;carehub.local</a>
+  </div>
+</footer>
