@@ -1,0 +1,119 @@
+<main class="wrap archive">
+  <section class="band">
+    <header class="hero">
+      <div class="hero-text">
+        <h1>Archives</h1>
+        <p>Browse entries from previous days ✨</p>
+      </div>
+      <div class="hero-pills">
+        <span class="pill">Next reset in <strong>{{ nextResetCountdown }}</strong></span>
+        <span class="pill subtle" *ngIf="lastArchivedDate">Last archiving <strong>{{ lastArchivedDate }}</strong></span>
+      </div>
+    </header>
+
+    <section class="filters">
+      <div class="field stretch">
+        <label>Search</label>
+        <input type="text" placeholder="e.g. Monday, birthday, coffee..." [(ngModel)]="q" (input)="setPage(1)" />
+      </div>
+
+      <div class="field">
+        <label>From</label>
+        <input type="date" [(ngModel)]="from" (change)="setPage(1)" />
+      </div>
+
+      <div class="field">
+        <label>To</label>
+        <input type="date" [(ngModel)]="to" (change)="setPage(1)" />
+      </div>
+
+      <div class="field">
+        <label>Sort</label>
+        <select [(ngModel)]="sortDir" (change)="setPage(1)">
+          <option value="desc">Newest → oldest</option>
+          <option value="asc">Oldest → newest</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>To the page</label>
+        <select [(ngModel)]="pageSize" (change)="setPage(1)">
+          <option>5</option><option selected>8</option><option>12</option><option>20</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn ghost" (click)="clearFilters()">Clear filters</button>
+        <button class="btn" (click)="exportCSV()">CSV export</button>
+        <button class="btn warn" (click)="clearAll()">Clear archive</button>
+      </div>
+    </section>
+  </section>
+
+  <section *ngIf="filtered.length === 0" class="empty card">
+    <div class="illu">📚</div>
+    <div>
+      <h3>Still empty</h3>
+      <p>When the day ends, the record will appear here automatically.You can also use "Save Now" in the daily preview.</p>
+    </div>
+  </section>
+
+  <section class="timeline card" *ngIf="filtered.length">
+    <div class="line"></div>
+
+    <article class="entry" *ngFor="let h of paged" [ngClass]="'mood-' + (h.mood || 0)">
+      <div class="dot"></div>
+
+      <header class="entry-head">
+        <div class="date-group">
+          <span class="date-badge">{{ h.date }}</span>
+          <span class="mood" [title]="moodLabel(h.mood)">{{ moodEmoji(h.mood) }}</span>
+        </div>
+        <button class="btn tiny danger" (click)="removeEntry(h.date)">Delete</button>
+      </header>
+
+      <section class="metrics">
+        <div class="stat">
+          <div class="stat-head">🦶 Steps</div>
+          <div class="stat-value">{{ h.steps | number:'1.0-0' }}</div>
+          <div class="bar"><div class="fill accent" [style.width.%]="pct(h.steps,10000)"></div></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-head">💧 Water</div>
+          <div class="stat-value">{{ h.water | number:'1.0-1' }} L</div>
+          <div class="bar"><div class="fill aqua" [style.width.%]="pct(h.water,2.5)"></div></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-head">😴 Sleep</div>
+          <div class="stat-value">{{ h.sleep | number:'1.0-1' }} h</div>
+          <div class="bar"><div class="fill violet" [style.width.%]="pct(h.sleep,8)"></div></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-head">🏋️ Exercises</div>
+          <div class="stat-value">{{ h.exercise | number:'1.0-0' }} min</div>
+          <div class="bar"><div class="fill red" [style.width.%]="pct(h.exercise,60)"></div></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-head">🍽️ Calories</div>
+          <div class="stat-value">{{ h.calories | number:'1.0-0' }} kcal</div>
+          <div class="bar"><div class="fill kcal" [style.width.%]="pct(h.calories,2200)"></div></div>
+        </div>
+      </section>
+
+      <section class="note" *ngIf="h.moodNote">
+        <div class="note-title">Note</div>
+        <div class="note-body">{{ h.moodNote }}</div>
+      </section>
+    </article>
+
+    <div class="pager">
+      <button class="btn" (click)="setPage(page-1)" [disabled]="page<=1">‹ Previous</button>
+      <span>Strona {{ page }} / {{ totalPages }}</span>
+      <button class="btn" (click)="setPage(page+1)" [disabled]="page>=totalPages">Next ›</button>
+    </div>
+  </section>
+</main>
