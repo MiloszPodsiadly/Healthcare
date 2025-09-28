@@ -1,28 +1,183 @@
-<section class="wrap">
-  <h2>In build...</h2>
+<main class="wrap">
+  <header class="header">
+    <h1>Daily preview</h1>
+    <p class="subtitle">Your health today</p>
+    <div class="status">
+      <span class="badge">Next reset in: {{ nextResetCountdown }}</span>
+      <button class="btn ghost" (click)="archiveNow()" title="Save your daily status and reset your counters">Save now</button>
+    </div>
+  </header>
 
-  <div *ngIf="loading" class="loading">Ładowanie…</div>
+  <section class="grid grid-top">
+    <article class="card" data-widget="steps">
+      <div class="card-head">
+        <div class="icon">🦶</div>
+        <div>
+          <h3>Steps</h3>
+          <small>Today's progress</small>
+        </div>
+      </div>
 
-  <div *ngIf="!loading && data" class="grid">
-    <article class="tile">
-      <h3>Kroki</h3>
-      <p class="val">{{ data!.steps.value ?? 0 }} / {{ data!.steps.goal ?? '—' }} {{ data!.steps.unit }}</p>
+      <div class="metric">
+        <span class="value">{{ state.steps | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="progress">
+        <div class="bar" [style.width.%]="pct(state.steps, state.stepsGoal)"></div>
+      </div>
+      <div class="goal">
+        <small>from</small>
+        <span>{{ state.stepsGoal | number:'1.0-0' }}</span>
+        <small>steps</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" (click)="addSteps(1000)">+1000</button>
+        <button class="btn ghost" (click)="addSteps(-100)">-100</button>
+        <button class="btn warn" (click)="editSteps()">Edit</button>
+      </div>
     </article>
 
-    <article class="tile">
-      <h3>Woda</h3>
-      <p class="val">{{ data!.water.value ?? 0 }} / {{ data!.water.goal ?? '—' }} {{ data!.water.unit }}</p>
-      <div class="bar"><span [style.width.%]="pct(data!.water.value, data!.water.goal)"></span></div>
+    <article class="card" data-widget="water">
+      <div class="card-head">
+        <div class="icon">💧</div>
+        <div>
+          <h3>Water</h3>
+          <small>Hydration of the body</small>
+        </div>
+      </div>
+
+      <div class="metric">
+        <span class="value">{{ state.water | number:'1.0-1' }}</span>
+        <span class="unit">L</span>
+      </div>
+
+      <div class="progress">
+        <div class="bar" [style.width.%]="pct(state.water, state.waterGoal)"></div>
+      </div>
+      <div class="goal">
+        <small>from</small>
+        <span>{{ state.waterGoal | number:'1.0-1' }}</span>
+        <small>L daily</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" (click)="addWater(0.25)">+0.25 L</button>
+        <button class="btn ghost" (click)="addWater(-0.1)">-0.1 L</button>
+        <button class="btn warn" (click)="editWater()">Edit</button>
+      </div>
     </article>
 
-    <article class="tile">
-      <h3>Sen</h3>
-      <p class="val">{{ data!.sleep.value ?? 0 }} / {{ data!.sleep.goal ?? '—' }} {{ data!.sleep.unit }}</p>
+    <article class="card" data-widget="sleep">
+      <div class="card-head">
+        <div class="icon">😴</div>
+        <div>
+          <h3>Sleep</h3>
+          <small>Last night</small>
+        </div>
+      </div>
+
+      <div class="metric">
+        <span class="value">{{ state.sleep | number:'1.0-1' }}</span>
+        <span class="unit">h</span>
+      </div>
+
+      <div class="progress">
+        <div class="bar" [style.width.%]="pct(state.sleep, state.sleepGoal)"></div>
+      </div>
+      <div class="goal">
+        <small>from</small>
+        <span>{{ state.sleepGoal }}</span>
+        <small>h recommended</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn warn" (click)="editSleep()">Edit</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="grid">
+    <article class="card tall" data-widget="exercise">
+      <div class="card-head">
+        <div class="icon">🏋️</div>
+        <div>
+          <h3>Exercises</h3>
+          <small>Physical activity</small>
+        </div>
+      </div>
+
+      <div class="metric">
+        <span class="value">{{ state.exercise | number:'1.0-0' }}</span>
+        <span class="unit">min</span>
+      </div>
+
+      <div class="progress">
+        <div class="bar danger" [style.width.%]="pct(state.exercise, state.exerciseGoal)"></div>
+      </div>
+      <div class="goal">
+        <small>from</small>
+        <span>{{ state.exerciseGoal }}</span>
+        <small>min daily</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" (click)="addExercise(10)">+10 min</button>
+        <button class="btn ghost" (click)="addExercise(-5)">-5 min</button>
+        <button class="btn warn" (click)="editExercise()">Edit</button>
+      </div>
     </article>
 
-    <article class="tile">
-      <h3>Nastrój</h3>
-      <p class="val">{{ data!.mood.value ?? '—' }}</p>
+    <!-- Kalorie -->
+    <article class="card tall kcal" data-widget="calories">
+      <div class="card-head">
+        <div class="icon">🍽️</div>
+        <div>
+          <h3>Calories</h3>
+          <small>Delivered with food</small>
+        </div>
+      </div>
+
+      <div class="metric">
+        <span class="value">{{ state.calories | number:'1.0-0' }}</span>
+        <span class="unit">kcal</span>
+      </div>
+
+      <div class="progress">
+        <div class="bar kcal" [style.width.%]="pct(state.calories, state.caloriesGoal)"></div>
+      </div>
+      <div class="goal">
+        <small>from</small>
+        <span>{{ state.caloriesGoal | number:'1.0-0' }}</span>
+        <small>kcal daily</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" (click)="addCalories(100)">+100</button>
+        <button class="btn ghost" (click)="addCalories(-50)">-50</button>
+        <button class="btn warn" (click)="editCalories()">Edit</button>
+      </div>
     </article>
-  </div>
-</section>
+  </section>
+
+  <section class="mood card">
+    <div class="card-head">
+      <div class="icon">🌤️</div>
+      <div>
+        <h3>Mood</h3>
+        <small>How are you feeling today?</small>
+      </div>
+    </div>
+
+    <div class="mood-row" id="moodRow">
+      <button class="mood-btn" [class.active]="state.mood===1" (click)="setMood(1)" title="Sad">😟</button>
+      <button class="mood-btn" [class.active]="state.mood===2" (click)="setMood(2)" title="Not great">🙂</button>
+      <button class="mood-btn" [class.active]="state.mood===3" (click)="setMood(3)" title="OK">😊</button>
+      <button class="mood-btn" [class.active]="state.mood===4" (click)="setMood(4)" title="Content">😋</button>
+      <button class="mood-btn" [class.active]="state.mood===5" (click)="setMood(5)" title="Great!">🤩</button>
+    </div>
+
+    <label class="note-label" for="moodNote">Optional note on mood…</label>
+    <textarea id="moodNote" rows="3" [value]="state.moodNote" (input)="onMoodNoteInput($event)" placeholder="Add a short comment"></textarea>
+  </section>
+</main>
