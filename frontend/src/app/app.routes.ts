@@ -12,12 +12,17 @@ export const routes: Routes = [
       {
         path: 'row-a',
         loadComponent: () =>
-          import('./component/sectionA/rowA/row-a.page').then(m => m.RowAPage)
+          import('./component/sectionA/rowA/row-a.page').then(m => m.RowAPageComponent)
       },
       {
         path: 'row-b',
         loadComponent: () =>
           import('./component/sectionA/rowB/row-b.page').then(m => m.RowBPage)
+      },
+      {
+        path: 'row-c',
+        loadComponent: () =>
+          import('./component/sectionA/rowC/row-c.page').then(m => m.RowCPageComponent)
       },
       { path: '', pathMatch: 'full', redirectTo: 'row-a' }
     ]
