@@ -17,7 +17,7 @@ export const routes: Routes = [
       {
         path: 'row-b',
         loadComponent: () =>
-          import('./component/sectionA/rowB/row-b.page').then(m => m.RowBPage)
+          import('./component/sectionA/rowB/row-b.page').then(m => m.RowBPageComponent)
       },
       {
         path: 'row-c',
