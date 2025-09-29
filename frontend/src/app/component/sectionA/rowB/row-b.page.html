@@ -1,140 +1,89 @@
-<section class="wrap">
-  <h2>Quick actions</h2>
+<main class="wrap rowb">
+  <header class="header">
+    <h1>💪 Exercise Review</h1>
+    <p class="subtitle">Find the right exercise, check the step-by-step instructions and add to your favorites</p>
+  </header>
 
-  <!-- WATER -->
-  <article class="card">
-    <header class="head">
-      <div class="tit">
-        <span class="ico" aria-hidden="true">💧</span>
-        <h3>Water</h3>
-      </div>
+  <section class="band">
+    <div class="filters">
+      <input
+        type="text"
+        [(ngModel)]="q"
+        (input)="onFiltersChanged()"
+        placeholder="🔍 Search by exercise name…"
+      />
+      <input
+        type="text"
+        [(ngModel)]="bodyPart"
+        (input)="onFiltersChanged()"
+        placeholder="🧩Body part (e.g. chest)"
+      />
+      <input
+        type="text"
+        [(ngModel)]="equipment"
+        (input)="onFiltersChanged()"
+        placeholder="🏋️ Equipment (e.g. barbell)"
+      />
 
-      <div class="meta" *ngIf="!loading">
-        <div class="bar"><span [style.width.%]="pct(waterToday, waterGoal)"></span></div>
-        <div class="nums">
-          <strong>{{ waterToday }} ml</strong>
-          <span *ngIf="waterGoal">/ {{ waterGoal }} ml</span>
-        </div>
-      </div>
-    </header>
-
-    <div class="row">
-      <button class="btn" [disabled]="posting" (click)="addWater(250)">+ 250 ml</button>
-      <button class="btn" [disabled]="posting" (click)="addWater(500)">+ 500 ml</button>
-      <button class="btn" [disabled]="posting" (click)="addWater(1000)">+ 1000 ml</button>
-
-      <div class="custom">
-        <input type="number" min="1" max="5000" step="50"
-               [(ngModel)]="customMl" placeholder="Custom amount (ml)">
-        <button class="btn ghost" [disabled]="posting" (click)="addCustomWater()">Add</button>
-      </div>
-    </div>
-
-    <p class="hint" *ngIf="!waterGoal">No daily water goal — you can add it later.</p>
-
-    <div class="chips" *ngIf="entries?.length">
-      <span class="chip" *ngFor="let e of entries">
-        {{ e.value }} ml
-        <button class="x" title="Remove" (click)="removeWater(e)">×</button>
-      </span>
-    </div>
-  </article>
-
-  <!-- MOOD -->
-  <article class="card">
-    <header class="head">
-      <div class="tit">
-        <span class="ico" aria-hidden="true">📝</span>
-        <h3>Mood</h3>
-      </div>
-
-      <!-- optional mood progress if you ever add a goal -->
-      <div class="meta" *ngIf="moodGoal">
-        <div class="bar"><span [style.width.%]="pct(moodToday, moodGoal)"></span></div>
-        <div class="nums"><strong>{{ moodToday }}</strong> / {{ moodGoal }}</div>
-      </div>
-    </header>
-
-    <div class="row mood">
-      <div class="faces" role="radiogroup" aria-label="Choose mood">
-        <button class="face" [class.on]="moodValue===1" (click)="setMood(1)" title="Bad">😞</button>
-        <button class="face" [class.on]="moodValue===2" (click)="setMood(2)" title="Meh">😐</button>
-        <button class="face" [class.on]="moodValue===3" (click)="setMood(3)" title="OK">🙂</button>
-        <button class="face" [class.on]="moodValue===4" (click)="setMood(4)" title="Good">😄</button>
-        <button class="face" [class.on]="moodValue===5" (click)="setMood(5)" title="Great">🤩</button>
-      </div>
-
-      <input class="note" type="text" maxlength="120"
-             [(ngModel)]="moodNote" placeholder="(optional) short note">
-      <button class="btn ghost" [disabled]="!moodValue || posting" (click)="saveMood()">Add</button>
-    </div>
-  </article>
-
-  <!-- MEAL (kcal) -->
-  <article class="card">
-    <header class="head">
-      <div class="tit">
-        <span class="ico" aria-hidden="true">🍽️</span>
-        <h3>Meal</h3>
-      </div>
-
-      <div class="meta" *ngIf="mealGoal">
-        <div class="bar"><span [style.width.%]="pct(mealToday, mealGoal)"></span></div>
-        <div class="nums">
-          <strong>{{ mealToday }} kcal</strong>
-          <span>/ {{ mealGoal }} kcal</span>
-        </div>
-      </div>
-    </header>
-
-    <div class="row">
-      <select [(ngModel)]="mealType" aria-label="Meal type">
-        <option value="BREAKFAST">Breakfast</option>
-        <option value="LUNCH">Lunch</option>
-        <option value="DINNER">Dinner</option>
-        <option value="SNACK">Snack</option>
+      <select [(ngModel)]="pageSize" (change)="onFiltersChanged()" aria-label="Quantity per page">
+        <option [ngValue]="10">10 / page</option>
+        <option [ngValue]="20">20 / page</option>
+        <option [ngValue]="50">50 / page</option>
       </select>
 
-      <input type="text" [(ngModel)]="mealName" placeholder="Name (e.g., Oatmeal)">
-      <input type="number" min="0" max="4000" step="10"
-             [(ngModel)]="mealKcal" placeholder="Calories (e.g., 650)">
-
-      <button class="btn ghost" [disabled]="posting || !mealName" (click)="saveMeal()">Add</button>
+      <button class="btn primary" (click)="search()">Search</button>
+      <button class="btn ghost" (click)="clearFilters()">Clear</button>
     </div>
+  </section>
 
-    <p class="hint" *ngIf="!mealGoal">No daily calories goal — progress bar will show after you set it.</p>
-  </article>
+  <!-- Empty / loading -->
+  <section class="empty card" *ngIf="loading || (!loading && !results.length)">
+    <ng-container *ngIf="loading; else nores">
+      <div class="spinner"></div>
+      <p>Loading exercises…</p>
+    </ng-container>
+    <ng-template #nores>
+      <p>No results for the selected filters.</p>
+    </ng-template>
+  </section>
 
-  <!-- ACTIVITY (minutes) -->
-  <article class="card">
-    <header class="head">
-      <div class="tit">
-        <span class="ico" aria-hidden="true">🧘</span>
-        <h3>Activity</h3>
+  <section class="ex-list" *ngIf="!loading && results.length">
+    <article class="ex card" *ngFor="let ex of results">
+      <div class="ex-image" *ngIf="ex.image">
+        <img [src]="ex.image" [alt]="ex.name" loading="lazy" />
       </div>
 
-      <div class="meta" *ngIf="activityGoal">
-        <div class="bar"><span [style.width.%]="pct(activityToday, activityGoal)"></span></div>
-        <div class="nums">
-          <strong>{{ activityToday }} min</strong>
-          <span>/ {{ activityGoal }} min</span>
+      <div class="ex-body">
+        <h2 class="ex-title">{{ ex.name }}</h2>
+
+        <div class="ex-tags">
+          <span class="tag">🧩 {{ ex.bodyPart || 'without indication' }}</span>
+          <span class="tag" *ngIf="ex.target">🎯 {{ ex.target }}</span>
+          <span class="tag eq" *ngIf="ex.equipment">🏋️ {{ ex.equipment }}</span>
+          <span class="tag" *ngFor="let s of ex.secondaryMuscles">➕ {{ s }}</span>
         </div>
-      </div>
-    </header>
 
-    <div class="row">
-      <input type="text" [(ngModel)]="exName" placeholder="Name (e.g., Yoga, Walk)">
-      <div class="custom" style="gap:6px">
-        <button class="btn" (click)="decMinutes()">−5</button>
-        <input type="number" min="1" max="240" step="1" [(ngModel)]="exMinutes" aria-label="Minutes">
-        <button class="btn" (click)="incMinutes()">+5</button>
+        <h4 class="section-title" *ngIf="ex.instructions?.length">How to perform</h4>
+        <ul class="steps" *ngIf="ex.instructions?.length; else noinst">
+          <li *ngFor="let step of ex.instructions">{{ step }}</li>
+        </ul>
+        <ng-template #noinst>
+          <p class="ex-desc">There are no instructions for this exercise.</p>
+        </ng-template>
       </div>
-      <button class="btn ghost" [disabled]="posting || !exName" (click)="saveExercise()">Add</button>
+
+      <footer class="ex-footer">
+        <button class="btn" [class.primary]="isFav(ex.id)" (click)="toggleFav(ex)">
+          {{ isFav(ex.id) ? '★ Favorites' : '☆ Add to favorites' }}
+        </button>
+        <a class="btn ghost" [href]="sourceLink" target="_blank" rel="noopener">Data source ↗</a>
+      </footer>
+    </article>
+
+    <div class="pager" *ngIf="totalPages > 1">
+      <button class="btn" (click)="setPage(page-1)" [disabled]="page<=1">‹ Previous</button>
+      <span>Strona {{ page }} / {{ totalPages }}</span>
+      <button class="btn" (click)="setPage(page+1)" [disabled]="page>=totalPages">Next ›</button>
     </div>
-
-    <p class="hint" *ngIf="!activityGoal">No daily minutes goal — set it to see progress.</p>
-  </article>
-
-  <!-- Toast -->
-  <div class="toast" *ngIf="toast">{{ toast }}</div>
-</section>
+  </section>
+</main>

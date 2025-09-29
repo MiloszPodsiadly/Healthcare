@@ -1,233 +1,193 @@
+import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 
-type Metric = { value: number | null; goal: number | null; unit: string };
-type TodayDto = {
-  date: string;
-  water?: Metric;
-  calories?: Metric;   // daily calories eaten
-  activity?: Metric;   // daily activity minutes
-  mood?: Metric;       // optional, if you ever aggregate mood count
+const GH_JSON =
+  'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
+const GH_IMG_BASE =
+  'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+
+type RawExercise = {
+  id: string;
+  name: string;
+  force?: string;
+  level?: string;
+  mechanic?: string;
+  equipment?: string;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  instructions?: string[];
+  category?: string;
+  images?: string[];
 };
 
-type WaterEntry = { id: number; value: number; createdAt?: string };
+type ExerciseView = {
+  id: string;
+  name: string;
+  bodyPart?: string;
+  target?: string;
+  equipment?: string;
+  secondaryMuscles: string[];
+  instructions: string[];
+  image?: string;
+};
+
+const LS_FAV = 'rowB_fav';
+
+const norm = (s?: string) => (s ?? '').toLowerCase().trim();
 
 @Component({
+  selector: 'app-row-b-page',
   standalone: true,
-  selector: 'app-row-b',
   imports: [CommonModule, FormsModule],
   templateUrl: './row-b.page.html',
-  styleUrls: ['./row-b.page.css']
+  styleUrls: ['./row-b.page.css'],
+  encapsulation: ViewEncapsulation.None
 })
-export class RowBPage implements OnInit {
-  private http = inject(HttpClient);
-  private API = '/api';
+export class RowBPageComponent implements OnInit {
 
-  // UI state
+  q = '';
+  bodyPart = '';
+  equipment = '';
+  pageSize = 10;
+
+  page = 1;
+  totalPages = 1;
+
   loading = false;
-  posting = false;
-  toast: string | null = null;
+  error = '';
 
-  // WATER
-  waterToday = 0;
-  waterGoal: number | null = null;
-  entries: WaterEntry[] = [];
-  customMl: number | null = null;
+  // dane
+  private all: ExerciseView[] = [];
+  private filtered: ExerciseView[] = [];
 
-  // MOOD
-  moodValue: 1|2|3|4|5 | null = null;
-  moodNote = '';
-  moodToday = 0;
-  moodGoal: number | null = null; // optional, kept for symmetry
+  results: ExerciseView[] = [];
 
-  // MEAL (kcal)
-  mealType: 'BREAKFAST'|'LUNCH'|'DINNER'|'SNACK' = 'BREAKFAST';
-  mealName = '';
-  mealKcal: number | null = null;
-  mealToday = 0;
-  mealGoal: number | null = null;
+  favorites: Record<string, true> = {};
 
-  // ACTIVITY (minutes)
-  exName = '';
-  exMinutes = 5;
-  activityToday = 0;
-  activityGoal: number | null = null;
+  sourceLink = 'https://github.com/yuhonas/free-exercise-db';
 
-  ngOnInit(): void {
-    this.loadSummary();
-    this.loadWaterEntries();
+  private debounceTimer: any = null;
+
+  async ngOnInit() {
+    this.loadFav();
+    await this.ensureDataLoaded();
+    this.search();
   }
 
-  // ===== LOAD =====
-  private loadSummary() {
+  private async ensureDataLoaded() {
+    if (this.all.length) return;
     this.loading = true;
-    this.http.get<TodayDto>(`${this.API}/dashboard/today`, { withCredentials: true })
-      .subscribe({
-        next: d => {
-          // water
-          this.waterToday = d.water?.value ?? 0;
-          this.waterGoal  = d.water?.goal  ?? null;
+    this.error = '';
 
-          // meals (kcal)
-          this.mealToday = d.calories?.value ?? 0;
-          this.mealGoal  = d.calories?.goal  ?? null;
+    try {
+      const res = await fetch(GH_JSON, { cache: 'force-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const raw: RawExercise[] = await res.json();
 
-          // activity (minutes)
-          this.activityToday = d.activity?.value ?? 0;
-          this.activityGoal  = d.activity?.goal  ?? null;
+      this.all = raw.map((r) => {
+        const primary = r.primaryMuscles?.[0] || '';
+        const img = r.images?.[0]
+          ? this.imageUrl(r.images[0])
+          : undefined;
 
-          // mood aggregated (optional)
-          this.moodToday = d.mood?.value ?? 0;
-          this.moodGoal  = d.mood?.goal  ?? null;
-
-          this.loading = false;
-        },
-        error: _ => { this.loading = false; }
+        return {
+          id: r.id,
+          name: r.name,
+          bodyPart: primary,
+          target: r.secondaryMuscles?.[0],
+          equipment: r.equipment,
+          secondaryMuscles: r.secondaryMuscles ?? [],
+          instructions: r.instructions ?? [],
+          image: img
+        };
       });
-  }
-
-  private loadWaterEntries() {
-    this.http.get<WaterEntry[]>(
-      `${this.API}/habits`,
-      { params: { type: 'WATER', date: 'today' }, withCredentials: true }
-    ).subscribe({
-      next: rows => { this.entries = rows ?? []; },
-      error: _ => { /* fine if endpoint not implemented */ }
-    });
-  }
-
-  // ===== PROGRESS helper =====
-  pct(value?: number | null, goal?: number | null): number {
-    if (!value || !goal || goal <= 0) return 0;
-    const p = Math.round((value / goal) * 100);
-    return Math.max(0, Math.min(100, p));
-  }
-
-  // ===== WATER =====
-  addWater(ml: number) {
-    if (this.posting) return;
-    this.posting = true;
-
-    const req$ = ml === 250
-      ? this.http.post<number>(`${this.API}/habits/water/250`, null, { withCredentials: true })
-      : this.http.post<number>(`${this.API}/habits`, { type: 'WATER', value: ml }, { withCredentials: true });
-
-    req$.subscribe({
-      next: id => {
-        this.waterToday += ml;
-        this.entries.unshift({ id, value: ml, createdAt: new Date().toISOString() });
-        this.posting = false;
-        this.showToast(`Added ${ml} ml 💧`);
-      },
-      error: _ => {
-        this.posting = false;
-        this.showToast('Could not add water');
-      }
-    });
-  }
-
-  addCustomWater() {
-    const ml = Number(this.customMl);
-    if (!ml || ml <= 0 || ml > 5000) {
-      this.showToast('Enter 1–5000 ml');
-      return;
+    } catch (e: any) {
+      console.error(e);
+      this.error = 'Failed to download exercises from GitHub.';
+      this.all = [];
+    } finally {
+      this.loading = false;
     }
-    this.addWater(ml);
-    this.customMl = null;
   }
 
-  removeWater(entry: WaterEntry) {
-    this.http.delete(`${this.API}/habits/${entry.id}`, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          this.entries = this.entries.filter(e => e.id !== entry.id);
-          this.waterToday = Math.max(0, this.waterToday - entry.value);
-          this.showToast('Entry removed');
-        },
-        error: _ => this.showToast('Could not remove entry')
-      });
+  private imageUrl(path: string): string {
+    return GH_IMG_BASE + encodeURI(path);
   }
 
-  // ===== MOOD =====
-  setMood(v: 1|2|3|4|5) { this.moodValue = v; }
+  search() {
+    const q = norm(this.q);
+    const bp = norm(this.bodyPart);
+    const eq = norm(this.equipment);
 
-  saveMood() {
-    if (!this.moodValue) return;
-    this.posting = true;
-    this.http.post(`${this.API}/mood`, {
-      value: this.moodValue, note: this.moodNote?.trim() || null
-    }, { withCredentials: true }).subscribe({
-      next: _ => {
-        this.posting = false;
-        this.moodNote = '';
-        this.showToast('Mood saved 😊');
-      },
-      error: _ => {
-        this.posting = false;
-        this.showToast('Could not save mood');
-      }
-    });
+    let list = this.all;
+
+    if (q) {
+      list = list.filter((x) =>
+        (x.name + ' ' + (x.bodyPart ?? '') + ' ' + (x.target ?? ''))
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+    if (bp) {
+      list = list.filter((x) => norm(x.bodyPart).includes(bp));
+    }
+    if (eq) {
+      list = list.filter((x) => norm(x.equipment).includes(eq));
+    }
+
+    this.filtered = list;
+    this.page = 1;
+    this.updatePage();
   }
 
-  // ===== MEAL (kcal) =====
-  saveMeal(){
-    if (!this.mealName?.trim()) return;
-    this.posting = true;
-    const kcal = this.mealKcal ?? 0;
-
-    this.http.post(`${this.API}/meals`, {
-      type: this.mealType, name: this.mealName.trim(), kcal
-    }, { withCredentials: true }).subscribe({
-      next: _ => {
-        this.posting = false;
-        this.mealToday += kcal;
-        this.mealName = ''; this.mealKcal = null; this.mealType = 'BREAKFAST';
-        this.showToast('Meal added 🍽️');
-      },
-      error: _ => {
-        this.posting = false;
-        this.showToast('Could not add meal');
-      }
-    });
+  onFiltersChanged() {
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => this.search(), 250);
   }
 
-  // ===== ACTIVITY (minutes) =====
-  decMinutes(step = 5) {
-    const v = this.exMinutes - step;
-    this.exMinutes = v < 1 ? 1 : v;
-  }
-  incMinutes(step = 5) {
-    const v = this.exMinutes + step;
-    this.exMinutes = v > 240 ? 240 : v;
+  clearFilters() {
+    this.q = '';
+    this.bodyPart = '';
+    this.equipment = '';
+    this.pageSize = 10;
+    this.search();
   }
 
-  saveExercise(){
-    const name = this.exName?.trim();
-    if (!name) return;
-
-    this.posting = true;
-    const mins = this.exMinutes;
-
-    this.http.post(`${this.API}/exercises`, { name, minutes: mins }, { withCredentials: true })
-      .subscribe({
-        next: _ => {
-          this.posting = false;
-          this.activityToday += mins;
-          this.exName = ''; this.exMinutes = 5;
-          this.showToast('Activity added 🏃');
-        },
-        error: _ => {
-          this.posting = false;
-          this.showToast('Could not add activity');
-        }
-      });
+  setPage(p: number) {
+    this.page = Math.max(1, Math.min(this.totalPages, p));
+    this.updatePage();
+    const el = document.querySelector('.ex-list');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ===== UTIL =====
-  private showToast(msg: string) {
-    this.toast = msg;
-    setTimeout(() => this.toast = null, 2200);
+  private updatePage() {
+    const total = this.filtered.length;
+    this.totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.results = this.filtered.slice(start, end);
+  }
+
+  private loadFav() {
+    try {
+      this.favorites = JSON.parse(localStorage.getItem(LS_FAV) || '{}') || {};
+    } catch {
+      this.favorites = {};
+    }
+  }
+  private saveFav() {
+    localStorage.setItem(LS_FAV, JSON.stringify(this.favorites));
+  }
+  isFav(id: string) {
+    return !!this.favorites[id];
+  }
+  toggleFav(ex: ExerciseView) {
+    if (this.isFav(ex.id)) {
+      delete this.favorites[ex.id];
+    } else {
+      this.favorites[ex.id] = true;
+    }
+    this.saveFav();
   }
 }
