@@ -9,6 +9,7 @@
   </header>
 
   <section class="grid grid-top">
+    <!-- STEPS -->
     <article class="card" data-widget="steps">
       <div class="card-head">
         <div class="icon">🦶</div>
@@ -30,6 +31,11 @@
         <span>{{ state.stepsGoal | number:'1.0-0' }}</span>
         <small>steps</small>
       </div>
+      <div class="goal-controls">
+        <button class="btn" (click)="changeGoal('stepsGoal', 500)">+500</button>
+        <button class="btn ghost" (click)="changeGoal('stepsGoal', -500)">-500</button>
+        <button class="btn warn" (click)="editGoal('stepsGoal')">Edit goal</button>
+      </div>
 
       <div class="actions">
         <button class="btn" (click)="addSteps(1000)">+1000</button>
@@ -38,6 +44,7 @@
       </div>
     </article>
 
+    <!-- WATER -->
     <article class="card" data-widget="water">
       <div class="card-head">
         <div class="icon">💧</div>
@@ -60,6 +67,11 @@
         <span>{{ state.waterGoal | number:'1.0-1' }}</span>
         <small>L daily</small>
       </div>
+      <div class="goal-controls">
+        <button class="btn" (click)="changeGoal('waterGoal', 0.25)">+0.25 L</button>
+        <button class="btn ghost" (click)="changeGoal('waterGoal', -0.25)">-0.25 L</button>
+        <button class="btn warn" (click)="editGoal('waterGoal')">Edit goal</button>
+      </div>
 
       <div class="actions">
         <button class="btn" (click)="addWater(0.25)">+0.25 L</button>
@@ -68,6 +80,7 @@
       </div>
     </article>
 
+    <!-- SLEEP -->
     <article class="card" data-widget="sleep">
       <div class="card-head">
         <div class="icon">😴</div>
@@ -90,6 +103,11 @@
         <span>{{ state.sleepGoal }}</span>
         <small>h recommended</small>
       </div>
+      <div class="goal-controls">
+        <button class="btn" (click)="changeGoal('sleepGoal', 0.5)">+0.5 h</button>
+        <button class="btn ghost" (click)="changeGoal('sleepGoal', -0.5)">-0.5 h</button>
+        <button class="btn warn" (click)="editGoal('sleepGoal')">Edit goal</button>
+      </div>
 
       <div class="actions">
         <button class="btn warn" (click)="editSleep()">Edit</button>
@@ -98,6 +116,7 @@
   </section>
 
   <section class="grid">
+    <!-- EXERCISES -->
     <article class="card tall" data-widget="exercise">
       <div class="card-head">
         <div class="icon">🏋️</div>
@@ -120,6 +139,11 @@
         <span>{{ state.exerciseGoal }}</span>
         <small>min daily</small>
       </div>
+      <div class="goal-controls">
+        <button class="btn" (click)="changeGoal('exerciseGoal', 5)">+5 min</button>
+        <button class="btn ghost" (click)="changeGoal('exerciseGoal', -5)">-5 min</button>
+        <button class="btn warn" (click)="editGoal('exerciseGoal')">Edit goal</button>
+      </div>
 
       <div class="actions">
         <button class="btn" (click)="addExercise(10)">+10 min</button>
@@ -128,7 +152,7 @@
       </div>
     </article>
 
-    <!-- Kalorie -->
+    <!-- CALORIES -->
     <article class="card tall kcal" data-widget="calories">
       <div class="card-head">
         <div class="icon">🍽️</div>
@@ -151,6 +175,11 @@
         <span>{{ state.caloriesGoal | number:'1.0-0' }}</span>
         <small>kcal daily</small>
       </div>
+      <div class="goal-controls">
+        <button class="btn" (click)="changeGoal('caloriesGoal', 100)">+100</button>
+        <button class="btn ghost" (click)="changeGoal('caloriesGoal', -100)">-100</button>
+        <button class="btn warn" (click)="editGoal('caloriesGoal')">Edit goal</button>
+      </div>
 
       <div class="actions">
         <button class="btn" (click)="addCalories(100)">+100</button>
@@ -160,6 +189,7 @@
     </article>
   </section>
 
+  <!-- MOOD -->
   <section class="mood card">
     <div class="card-head">
       <div class="icon">🌤️</div>
@@ -181,3 +211,27 @@
     <textarea id="moodNote" rows="3" [value]="state.moodNote" (input)="onMoodNoteInput($event)" placeholder="Add a short comment"></textarea>
   </section>
 </main>
+
+<!-- ===== Modal: nice number editor ===== -->
+<div class="modal-overlay" [class.open]="_modal.open" (click)="closeModal($event)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>{{ _modal.title }}</h3>
+    <p>{{ _modal.label }}</p>
+    <div class="row">
+      <input
+        #num
+        type="number"
+        [step]="_modal.step"
+        [min]="_modal.min"
+        [max]="_modal.max"
+        [value]="_modal.value"
+        (keydown.enter)="confirmModal(num.value)"
+        autofocus
+      />
+    </div>
+    <div class="actions">
+      <button class="btn ghost" (click)="hideModal()">Cancel</button>
+      <button class="btn" (click)="confirmModal(num.value)">OK</button>
+    </div>
+  </div>
+</div>

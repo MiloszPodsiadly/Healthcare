@@ -8,8 +8,8 @@ type State = {
   exercise: number; exerciseGoal: number;
   calories: number; caloriesGoal: number;
   mood?: number; moodNote?: string;
-  lastUpdated?: string;
-  lastArchivedDate?: string;
+  lastUpdated?: string;       // YYYY-MM-DD
+  lastArchivedDate?: string;  // YYYY-MM-DD
 };
 
 type HistoryEntry = {
@@ -20,6 +20,13 @@ type HistoryEntry = {
 
 const LS_STATE = 'rowA';
 const LS_HISTORY = 'rowHistory';
+
+type GoalKey =
+  | 'stepsGoal'
+  | 'waterGoal'
+  | 'sleepGoal'
+  | 'exerciseGoal'
+  | 'caloriesGoal';
 
 @Component({
   selector: 'app-row-a-page',
@@ -46,6 +53,20 @@ export class RowAPageComponent implements OnInit, OnDestroy {
   private midnightTimer: any = null;
   private tickTimer: any = null;
 
+  // ===== Modal state =====
+  _modal = {
+    open: false,
+    title: '',
+    label: '',
+    value: 0,
+    step: 1,
+    min: 0,
+    max: Number.POSITIVE_INFINITY,
+    decimals: 0,
+    onConfirm: (v:number)=>{}
+  };
+
+  // listen changes from other tabs
   private onStorage = (ev: StorageEvent) => {
     if (ev.key === LS_STATE) {
       try {
@@ -64,14 +85,50 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.startTick();
 
     window.addEventListener('storage', this.onStorage);
+    window.addEventListener('keydown', this.handleEsc, { passive: true });
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.midnightTimer);
     clearInterval(this.tickTimer);
     window.removeEventListener('storage', this.onStorage);
+    window.removeEventListener('keydown', this.handleEsc);
   }
 
+  /* ================= Modal helpers ================= */
+  private openNumberModal(opts: {
+    title: string; label: string; value: number;
+    step?: number; min?: number; max?: number; decimals?: number;
+    onConfirm: (v:number)=>void;
+  }){
+    this._modal.open = true;
+    this._modal.title = opts.title;
+    this._modal.label = opts.label;
+    this._modal.value = opts.value;
+    this._modal.step = opts.step ?? 1;
+    this._modal.min = opts.min ?? 0;
+    this._modal.max = opts.max ?? Number.POSITIVE_INFINITY;
+    this._modal.decimals = opts.decimals ?? 0;
+    this._modal.onConfirm = opts.onConfirm;
+  }
+  hideModal(){ this._modal.open = false; }
+  closeModal(ev: Event){ ev.stopPropagation(); this.hideModal(); }
+  confirmModal(raw: string){
+    let v = Number(raw);
+    if (isNaN(v)) v = 0;
+    v = Math.max(this._modal.min, Math.min(this._modal.max, v));
+    if (this._modal.decimals > 0) {
+      const p = Math.pow(10, this._modal.decimals);
+      v = Math.round(v * p) / p;
+    } else {
+      v = Math.round(v);
+    }
+    this._modal.onConfirm(v);
+    this.hideModal();
+  }
+  private handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && this._modal.open) this.hideModal(); };
+
+  /* ================= History ================= */
   private loadHistory(): HistoryEntry[] {
     try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch { return []; }
   }
@@ -79,6 +136,7 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     localStorage.setItem(LS_HISTORY, JSON.stringify(list));
   }
 
+  /** save & reset; overwrite entry with the same date (no duplicates) */
   private archiveAndReset(archiveAsDate: string) {
     const entry: HistoryEntry = {
       date: archiveAsDate,
@@ -91,11 +149,11 @@ export class RowAPageComponent implements OnInit, OnDestroy {
       moodNote: this.state.moodNote
     };
 
-    const history = this.loadHistory()
-      .filter(h => h.date !== archiveAsDate);
+    const history = this.loadHistory().filter(h => h.date !== archiveAsDate);
     history.unshift(entry);
     this.saveHistory(history);
 
+    // reset
     this.state.steps = 0;
     this.state.water = 0;
     this.state.sleep = 0;
@@ -146,36 +204,110 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.tickTimer = setInterval(compute, 1000);
   }
 
+  /* ================= Helpers ================= */
   private today(): string { return new Date().toISOString().slice(0,10); }
-  private offsetDate(days: number): string { const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
-
+  private offsetDate(days: number): string { const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
   private persist() { localStorage.setItem(LS_STATE, JSON.stringify(this.state)); }
-
   pct(value: number, goal: number): number {
     const p = (value / goal) * 100;
     return !isFinite(p) ? 0 : Math.max(0, Math.min(100, p));
   }
 
+  /* ================= Goals ================= */
+  changeGoal(key: GoalKey, delta: number){
+    const current = Number(this.state[key] ?? 0);
+    const next = Math.max(0, +(current + delta).toFixed(2));
+    (this.state as any)[key] = next;
+    this.state.lastUpdated = this.today();
+    this.persist();
+  }
+  editGoal(key: GoalKey){
+    const current = Number(this.state[key] ?? 0);
+    const isDecimal = key === 'waterGoal' || key === 'sleepGoal';
+    const label =
+      key==='stepsGoal'    ? 'Set daily steps goal:' :
+        key==='waterGoal'    ? 'Set daily water goal (L):' :
+          key==='sleepGoal'    ? 'Set daily sleep goal (h):' :
+            key==='exerciseGoal' ? 'Set daily exercise goal (min):' :
+              'Set daily calories goal (kcal):';
+
+    this.openNumberModal({
+      title: 'Edit goal',
+      label,
+      value: current,
+      step: isDecimal ? 0.25 : 1,
+      decimals: isDecimal ? 2 : 0,
+      onConfirm: (v:number) => {
+        (this.state as any)[key] = v;
+        this.state.lastUpdated = this.today();
+        this.persist();
+      }
+    });
+  }
+
+  /* ================= Day values ================= */
   addSteps(a:number){ this.state.steps=Math.max(0,this.state.steps+a); this.state.lastUpdated=this.today(); this.persist(); }
-  editSteps(){ const v=prompt('Set steps:', String(this.state.steps)); if(v!==null){ this.state.steps=Math.max(0,Number(v)||0); this.state.lastUpdated=this.today(); this.persist(); } }
+  editSteps(){
+    this.openNumberModal({
+      title: 'Edit steps',
+      label: 'Set steps:',
+      value: this.state.steps,
+      step: 100,
+      onConfirm: (v)=>{ this.state.steps=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
+    });
+  }
 
   addWater(a:number){ this.state.water=Math.max(0,+(this.state.water+a).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
-  editWater(){ const v=prompt('Set the amount of water (L):', String(this.state.water)); if(v!==null){ this.state.water=Math.max(0,Number(v)||0); this.state.lastUpdated=this.today(); this.persist(); } }
+  editWater(){
+    this.openNumberModal({
+      title: 'Edit water',
+      label: 'Set the amount of water (L):',
+      value: this.state.water,
+      step: 0.1,
+      decimals: 2,
+      onConfirm: (v)=>{ this.state.water=Math.max(0, +(+v).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
+    });
+  }
 
-  editSleep(){ const v=prompt('How long did you sleep? (h):', String(this.state.sleep)); if(v!==null){ this.state.sleep=Math.max(0,Number(v)||0); this.state.lastUpdated=this.today(); this.persist(); } }
+  editSleep(){
+    this.openNumberModal({
+      title: 'Edit sleep',
+      label: 'How long did you sleep? (h):',
+      value: this.state.sleep,
+      step: 0.5,
+      decimals: 2,
+      onConfirm: (v)=>{ this.state.sleep=Math.max(0, +(+v).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
+    });
+  }
 
   addExercise(a:number){ this.state.exercise=Math.max(0,this.state.exercise+a); this.state.lastUpdated=this.today(); this.persist(); }
-  editExercise(){ const v=prompt('Set exercise minutes:', String(this.state.exercise)); if(v!==null){ this.state.exercise=Math.max(0,Number(v)||0); this.state.lastUpdated=this.today(); this.persist(); } }
+  editExercise(){
+    this.openNumberModal({
+      title: 'Edit exercises',
+      label: 'Set exercise minutes:',
+      value: this.state.exercise,
+      step: 5,
+      onConfirm: (v)=>{ this.state.exercise=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
+    });
+  }
 
   addCalories(a:number){ this.state.calories=Math.max(0,this.state.calories+a); this.state.lastUpdated=this.today(); this.persist(); }
-  editCalories(){ const v=prompt('Set calories (kcal):', String(this.state.calories)); if(v!==null){ this.state.calories=Math.max(0,Number(v)||0); this.state.lastUpdated=this.today(); this.persist(); } }
+  editCalories(){
+    this.openNumberModal({
+      title: 'Edit calories',
+      label: 'Set calories (kcal):',
+      value: this.state.calories,
+      step: 50,
+      onConfirm: (v)=>{ this.state.calories=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
+    });
+  }
 
   setMood(val:number){ this.state.mood = this.state.mood===val ? undefined : val; this.state.lastUpdated=this.today(); this.persist(); }
   onMoodNoteInput(ev:Event){ const value=(ev.target as HTMLTextAreaElement).value; this.state.moodNote=value; this.state.lastUpdated=this.today(); this.persist(); }
 
+  /* ================= Archiving ================= */
   archiveNow(){
     const today = this.today();
-
     try {
       const raw = localStorage.getItem(LS_STATE);
       if (raw) {
@@ -186,9 +318,8 @@ export class RowAPageComponent implements OnInit, OnDestroy {
 
     const history = this.loadHistory();
     const existsToday = history.some(h => h.date === today);
-
     if (existsToday) {
-      const ok = confirm('There is already an entry in the history with today\'s date, overwrite it with a new one?');
+      const ok = confirm('There is already an entry for today. Overwrite it with the current values?');
       if (!ok) return;
     }
 
