@@ -9,7 +9,6 @@
   </header>
 
   <section class="grid grid-top">
-    <!-- STEPS -->
     <article class="card" data-widget="steps">
       <div class="card-head">
         <div class="icon">🦶</div>
@@ -40,11 +39,10 @@
       <div class="actions">
         <button class="btn" (click)="addSteps(1000)">+1000</button>
         <button class="btn ghost" (click)="addSteps(-100)">-100</button>
-        <button class="btn warn" (click)="editSteps()">Edit</button>
+        <button class="btn warn" (click)="editSteps()">Edit score</button>
       </div>
     </article>
 
-    <!-- WATER -->
     <article class="card" data-widget="water">
       <div class="card-head">
         <div class="icon">💧</div>
@@ -76,11 +74,10 @@
       <div class="actions">
         <button class="btn" (click)="addWater(0.25)">+0.25 L</button>
         <button class="btn ghost" (click)="addWater(-0.1)">-0.1 L</button>
-        <button class="btn warn" (click)="editWater()">Edit</button>
+        <button class="btn warn" (click)="editWater()">Edit score</button>
       </div>
     </article>
 
-    <!-- SLEEP -->
     <article class="card" data-widget="sleep">
       <div class="card-head">
         <div class="icon">😴</div>
@@ -110,13 +107,12 @@
       </div>
 
       <div class="actions">
-        <button class="btn warn" (click)="editSleep()">Edit</button>
+        <button class="btn warn" (click)="editSleep()">Edit score</button>
       </div>
     </article>
   </section>
 
   <section class="grid">
-    <!-- EXERCISES -->
     <article class="card tall" data-widget="exercise">
       <div class="card-head">
         <div class="icon">🏋️</div>
@@ -148,11 +144,10 @@
       <div class="actions">
         <button class="btn" (click)="addExercise(10)">+10 min</button>
         <button class="btn ghost" (click)="addExercise(-5)">-5 min</button>
-        <button class="btn warn" (click)="editExercise()">Edit</button>
+        <button class="btn warn" (click)="editExercise()">Edit score</button>
       </div>
     </article>
 
-    <!-- CALORIES -->
     <article class="card tall kcal" data-widget="calories">
       <div class="card-head">
         <div class="icon">🍽️</div>
@@ -184,12 +179,11 @@
       <div class="actions">
         <button class="btn" (click)="addCalories(100)">+100</button>
         <button class="btn ghost" (click)="addCalories(-50)">-50</button>
-        <button class="btn warn" (click)="editCalories()">Edit</button>
+        <button class="btn warn" (click)="editCalories()">Edit score</button>
       </div>
     </article>
   </section>
 
-  <!-- MOOD -->
   <section class="mood card">
     <div class="card-head">
       <div class="icon">🌤️</div>
@@ -212,7 +206,6 @@
   </section>
 </main>
 
-<!-- ===== Modal: nice number editor ===== -->
 <div class="modal-overlay" [class.open]="_modal.open" (click)="closeModal($event)">
   <div class="modal" (click)="$event.stopPropagation()">
     <h3>{{ _modal.title }}</h3>

@@ -11,6 +11,8 @@
   --ring:rgba(0,0,0,.08);
   --radius:18px;
   --shadow:0 6px 16px rgba(0,0,0,.08);
+  --nav-h: 64px;
+  --sticky-gap: 8px;
 }
 
 *{box-sizing:border-box}
@@ -138,3 +140,4 @@ textarea{
   border:1px solid var(--ring); background:#f9fafb; font-size:16px;
 }
 .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+

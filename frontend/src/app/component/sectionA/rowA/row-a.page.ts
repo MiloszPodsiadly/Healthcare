@@ -8,15 +8,22 @@ type State = {
   exercise: number; exerciseGoal: number;
   calories: number; caloriesGoal: number;
   mood?: number; moodNote?: string;
-  lastUpdated?: string;       // YYYY-MM-DD
-  lastArchivedDate?: string;  // YYYY-MM-DD
+  lastUpdated?: string;
+  lastArchivedDate?: string;
 };
 
 type HistoryEntry = {
   date: string;
   steps: number; water: number; sleep: number; exercise: number; calories: number;
+
+  stepsGoal?: number;
+  waterGoal?: number;
+  sleepGoal?: number;
+  exerciseGoal?: number;
+  caloriesGoal?: number;
   mood?: number; moodNote?: string;
 };
+
 
 const LS_STATE = 'rowA';
 const LS_HISTORY = 'rowHistory';
@@ -53,7 +60,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
   private midnightTimer: any = null;
   private tickTimer: any = null;
 
-  // ===== Modal state =====
   _modal = {
     open: false,
     title: '',
@@ -66,7 +72,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     onConfirm: (v:number)=>{}
   };
 
-  // listen changes from other tabs
   private onStorage = (ev: StorageEvent) => {
     if (ev.key === LS_STATE) {
       try {
@@ -95,7 +100,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     window.removeEventListener('keydown', this.handleEsc);
   }
 
-  /* ================= Modal helpers ================= */
   private openNumberModal(opts: {
     title: string; label: string; value: number;
     step?: number; min?: number; max?: number; decimals?: number;
@@ -128,7 +132,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
   }
   private handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && this._modal.open) this.hideModal(); };
 
-  /* ================= History ================= */
   private loadHistory(): HistoryEntry[] {
     try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch { return []; }
   }
@@ -136,7 +139,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     localStorage.setItem(LS_HISTORY, JSON.stringify(list));
   }
 
-  /** save & reset; overwrite entry with the same date (no duplicates) */
   private archiveAndReset(archiveAsDate: string) {
     const entry: HistoryEntry = {
       date: archiveAsDate,
@@ -145,6 +147,12 @@ export class RowAPageComponent implements OnInit, OnDestroy {
       sleep: this.state.sleep,
       exercise: this.state.exercise,
       calories: this.state.calories,
+      stepsGoal: this.state.stepsGoal,
+      waterGoal: this.state.waterGoal,
+      sleepGoal: this.state.sleepGoal,
+      exerciseGoal: this.state.exerciseGoal,
+      caloriesGoal: this.state.caloriesGoal,
+
       mood: this.state.mood,
       moodNote: this.state.moodNote
     };
@@ -153,7 +161,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     history.unshift(entry);
     this.saveHistory(history);
 
-    // reset
     this.state.steps = 0;
     this.state.water = 0;
     this.state.sleep = 0;
@@ -165,6 +172,7 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.state.lastArchivedDate = archiveAsDate;
     this.persist();
   }
+
 
   private ensureDateConsistency() {
     const today = this.today();
@@ -204,7 +212,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.tickTimer = setInterval(compute, 1000);
   }
 
-  /* ================= Helpers ================= */
   private today(): string { return new Date().toISOString().slice(0,10); }
   private offsetDate(days: number): string { const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
   private persist() { localStorage.setItem(LS_STATE, JSON.stringify(this.state)); }
@@ -213,7 +220,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     return !isFinite(p) ? 0 : Math.max(0, Math.min(100, p));
   }
 
-  /* ================= Goals ================= */
   changeGoal(key: GoalKey, delta: number){
     const current = Number(this.state[key] ?? 0);
     const next = Math.max(0, +(current + delta).toFixed(2));
@@ -245,7 +251,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* ================= Day values ================= */
   addSteps(a:number){ this.state.steps=Math.max(0,this.state.steps+a); this.state.lastUpdated=this.today(); this.persist(); }
   editSteps(){
     this.openNumberModal({
@@ -305,7 +310,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
   setMood(val:number){ this.state.mood = this.state.mood===val ? undefined : val; this.state.lastUpdated=this.today(); this.persist(); }
   onMoodNoteInput(ev:Event){ const value=(ev.target as HTMLTextAreaElement).value; this.state.moodNote=value; this.state.lastUpdated=this.today(); this.persist(); }
 
-  /* ================= Archiving ================= */
   archiveNow(){
     const today = this.today();
     try {
