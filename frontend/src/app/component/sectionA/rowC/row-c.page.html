@@ -76,31 +76,46 @@
         <div class="stat">
           <div class="stat-head">🦶 Steps</div>
           <div class="stat-value">{{ h.steps | number:'1.0-0' }}</div>
-          <div class="bar"><div class="fill accent" [style.width.%]="pct(h.steps,10000)"></div></div>
+          <div class="bar">
+            <div class="fill accent" [style.width.%]="pct(h.steps, h.stepsGoal ?? 10000)"></div>
+          </div>
+          <div class="stat-sub">from {{ (h.stepsGoal ?? 10000) | number:'1.0-0' }} steps</div>
         </div>
 
         <div class="stat">
           <div class="stat-head">💧 Water</div>
           <div class="stat-value">{{ h.water | number:'1.0-1' }} L</div>
-          <div class="bar"><div class="fill aqua" [style.width.%]="pct(h.water,2.5)"></div></div>
+          <div class="bar">
+            <div class="fill aqua" [style.width.%]="pct(h.water, h.waterGoal ?? 2.5)"></div>
+          </div>
+          <div class="stat-sub">from {{ (h.waterGoal ?? 2.5) | number:'1.0-1' }} L daily</div>
         </div>
 
         <div class="stat">
           <div class="stat-head">😴 Sleep</div>
           <div class="stat-value">{{ h.sleep | number:'1.0-1' }} h</div>
-          <div class="bar"><div class="fill violet" [style.width.%]="pct(h.sleep,8)"></div></div>
+          <div class="bar">
+            <div class="fill violet" [style.width.%]="pct(h.sleep, h.sleepGoal ?? 8)"></div>
+          </div>
+          <div class="stat-sub">from {{ (h.sleepGoal ?? 8) | number:'1.0-0' }} h recommended</div>
         </div>
 
         <div class="stat">
           <div class="stat-head">🏋️ Exercises</div>
           <div class="stat-value">{{ h.exercise | number:'1.0-0' }} min</div>
-          <div class="bar"><div class="fill red" [style.width.%]="pct(h.exercise,60)"></div></div>
+          <div class="bar">
+            <div class="fill red" [style.width.%]="pct(h.exercise, h.exerciseGoal ?? 60)"></div>
+          </div>
+          <div class="stat-sub">from {{ (h.exerciseGoal ?? 60) | number:'1.0-0' }} min daily</div>
         </div>
 
         <div class="stat">
           <div class="stat-head">🍽️ Calories</div>
           <div class="stat-value">{{ h.calories | number:'1.0-0' }} kcal</div>
-          <div class="bar"><div class="fill kcal" [style.width.%]="pct(h.calories,2200)"></div></div>
+          <div class="bar">
+            <div class="fill kcal" [style.width.%]="pct(h.calories, h.caloriesGoal ?? 2200)"></div>
+          </div>
+          <div class="stat-sub">from {{ (h.caloriesGoal ?? 2200) | number:'1.0-0' }} kcal daily</div>
         </div>
       </section>
 

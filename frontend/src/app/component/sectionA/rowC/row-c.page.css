@@ -1,3 +1,14 @@
+:root {
+  --accent:#2563eb;
+  --aqua:#059669;
+  --violet:#7c3aed;
+  --red:#dc2626;
+  --kcal:#f59e0b;
+  --ring:rgba(0,0,0,.08);
+  --text:#111827;
+  --shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
 .archive .band{
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--ring);
@@ -121,5 +132,12 @@
 .btn.ghost{background:#fff}
 .btn.tiny{padding:4px 8px;font-size:12px}
 .btn.danger{background:#fff0f0;border-color:#ffb4b4}
+
+.stat-sub{
+  margin-top:4px;
+  font-size:12px;
+  color: var(--muted, #6b7280);
+}
+
 
 .pager{display:flex;gap:10px;align-items:center;justify-content:center;margin:14px 0}

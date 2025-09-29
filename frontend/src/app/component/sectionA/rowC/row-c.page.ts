@@ -9,9 +9,15 @@ type HistoryEntry = {
   sleep: number;
   exercise: number;
   calories: number;
+  stepsGoal?: number;
+  waterGoal?: number;
+  sleepGoal?: number;
+  exerciseGoal?: number;
+  caloriesGoal?: number;
   mood?: number;
   moodNote?: string;
 };
+
 
 const LS_HISTORY = 'rowHistory';
 const LS_STATE   = 'rowA';
@@ -138,16 +144,31 @@ export class RowCPageComponent implements OnDestroy {
   }
 
   exportCSV(){
-    const headers = ['date','steps','water','sleep','exercise','calories','mood','moodNote'];
+    const headers = [
+      'date','steps','water','sleep','exercise','calories',
+      'stepsGoal','waterGoal','sleepGoal','exerciseGoal','caloriesGoal',
+      'mood','moodNote'
+    ];
+
     const rows = this.filtered.map(h=>[
-      h.date, h.steps, h.water, h.sleep, h.exercise, h.calories, h.mood ?? '', (h.moodNote ?? '').replace(/\n/g,' ')
+      h.date,
+      h.steps, h.water, h.sleep, h.exercise, h.calories,
+      h.stepsGoal ?? 10000,
+      h.waterGoal ?? 2.5,
+      h.sleepGoal ?? 8,
+      h.exerciseGoal ?? 60,
+      h.caloriesGoal ?? 2200,
+      h.mood ?? '',
+      (h.moodNote ?? '').replace(/\n/g,' ')
     ]);
+
     const csv = [headers, ...rows].map(r=>r.join(';')).join('\n');
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'history-rowA.csv'; a.click();
     URL.revokeObjectURL(url);
   }
+
 
   pct(v:number,g:number){ const p=(v/g)*100; return Math.max(0,Math.min(100,isFinite(p)?p:0)); }
   moodEmoji(m?:number){ return m===1?'😟':m===2?'🙂':m===3?'😊':m===4?'😋':m===5?'🤩':'—'; }
