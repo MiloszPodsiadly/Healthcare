@@ -60,8 +60,8 @@
     <div class="nav-right">
       <nav class="links" aria-label="Main navigation">
         <a href="#streams">Value Streams</a>
-        <a href="#about">O projekcie</a>
-        <a href="#contact">Kontakt</a>
+        <a href="#about">About Project</a>
+        <a href="#contact">Contact</a>
       </nav>
 
       <button *ngIf="!isLoggedIn" class="cta" (click)="toggleLogin()">Start now</button>
@@ -93,9 +93,10 @@
       </h1>
 
       <p class="lead">
-        CareHub is a secure platform that integrates patients, clinics, and specialists.
-        All in one place: appointments, treatment history, documentation, medication
-        schedules, and smart reminders. Log in via <b>Google</b> lub <b>GitHub</b> –
+        The app is a personal health and fitness assistant that helps you monitor
+        your daily habits, track your progress, and gather health data in one place.
+        It allows you to easily manage your well-being and have full control over
+        your daily activity. Log in via <b>Google</b> lub <b>GitHub</b>
         with compliance standards OAuth&nbsp;2.0.
       </p>
     </div>
@@ -103,10 +104,10 @@
     <aside class="card" aria-label="Benefits">
       <h3>What will you gain?</h3>
       <ul>
-        <li>🩺 Quickly arrange appointments and teleconsultations</li>
-        <li>💊 Medication schedule with reminders</li>
-        <li>📄 Secure storage of results and referrals</li>
-        <li>👨‍⚕️ Sharing data with your doctor</li>
+        <li>👣 Steps, sleep, exercise, hydration and calories with editable goals</li>
+        <li>🏋️ Instructions, photos, search engine and favorite workouts</li>
+        <li>📄 Day history with notes, filtering and CSV export</li>
+        <li>🔒 All information stored in one place in a secure and transparent manner</li>
       </ul>
       <div class="secure">
         <span class="dot" aria-hidden="true"></span>
@@ -119,26 +120,27 @@
 <!-- About Project -->
 <section id="about" class="about">
   <div class="container">
-    <h2>O projekcie CareHub</h2>
+    <h2>About Project <span class="accent">CareHub</span></h2>
     <p>
-      CareHub was created to improve communication between patient, doctor and facility.
-      We combine best healthcare practices and modern standards security.
-      Our platform allows you to aggregate medical data from multiple sources,
-      and then presents them in a clear and understandable form.
+      The app was created to support users in their daily health and fitness goals.
+      Its main goal is to facilitate progress monitoring, build healthy habits,
+      and securely collect data in a clear and intuitive format.
+      Thanks to the modern dashboard, each user gains convenient access to their results,
+      full control over their goals, and the ability to track changes over time.
     </p>
 
     <div class="grid">
       <article>
-        <h3>Interoperability</h3>
-        <p>HL7/FHIR compliant data exchange and integration with branch systems.</p>
+        <h3>Daily Preview</h3>
+        <p>Quick insights into steps, sleep, exercise, hydration, and calories – all in one place.</p>
       </article>
       <article>
-        <h3>Patient at the center</h3>
-        <p>A clear dashboard, your own notes, medication and appointment reminders.</p>
+        <h3>Exercise Review</h3>
+        <p>An extensive database of exercises with descriptions and photos, filtered by body part and equipment.</p>
       </article>
       <article>
-        <h3>Security</h3>
-        <p>Encryption at rest and in transit, federated login, auditing.</p>
+        <h3>Archives & Security</h3>
+        <p>Day history with notes and CSV export, maintaining full data security.</p>
       </article>
     </div>
   </div>
@@ -149,10 +151,10 @@
   <div class="container">
     <h2>Value Streams</h2>
     <div class="pill-row">
-      <span class="pill">Digital Triage</span>
-      <span class="pill">Medication Adherence</span>
-      <span class="pill">Patient Journey</span>
-      <span class="pill">Data Insights</span>
+      <span class="pill">Daily Preview</span>
+      <span class="pill">Exercise Review</span>
+      <span class="pill">Archives</span>
+      <span class="pill">Progress Tracking</span>
     </div>
   </div>
 </section>
