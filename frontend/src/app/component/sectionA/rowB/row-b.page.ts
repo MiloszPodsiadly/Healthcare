@@ -57,7 +57,6 @@ export class RowBPageComponent implements OnInit {
   loading = false;
   error = '';
 
-  // dane
   private all: ExerciseView[] = [];
   private filtered: ExerciseView[] = [];
 

@@ -36,7 +36,6 @@
     </div>
   </section>
 
-  <!-- Empty / loading -->
   <section class="empty card" *ngIf="loading || (!loading && !results.length)">
     <ng-container *ngIf="loading; else nores">
       <div class="spinner"></div>
