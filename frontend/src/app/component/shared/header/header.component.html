@@ -1,0 +1,71 @@
+<header class="nav">
+  <div class="container">
+    <div class="nav-left">
+      <a class="brand" routerLink="/" aria-label="CareHub">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Healthcare Poland</span>
+      </a>
+
+      <nav class="sections" *ngIf="(isLoggedIn$ | async)" aria-label="Sekcje">
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">My health</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-a/row-a" routerLinkActive="active">Daily Preview</a></li>
+            <li><a routerLink="/section-a/row-b" routerLinkActive="active">Training exercises</a></li>
+            <li><a routerLink="/section-a/row-c" routerLinkActive="active">History</a></li>
+            <li><a routerLink="/section-a/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-a/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section B</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-b/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-b/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-b/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-b/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-b/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section C</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-c/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-c/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-c/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-c/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-c/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+
+        <div class="dd" aria-haspopup="true">
+          <button class="dd-toggle" aria-expanded="false">Section D</button>
+          <ul class="dd-menu">
+            <li><a routerLink="/section-d/row-a" routerLinkActive="active">Row 1</a></li>
+            <li><a routerLink="/section-d/row-b" routerLinkActive="active">Row 2</a></li>
+            <li><a routerLink="/section-d/row-c" routerLinkActive="active">Row 3</a></li>
+            <li><a routerLink="/section-d/row-d" routerLinkActive="active">Row 4</a></li>
+            <li><a routerLink="/section-d/row-e" routerLinkActive="active">Row 5</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <nav class="links" aria-label="Main navigation">
+        <a href="#streams">Value Streams</a>
+        <a href="#about">About Project</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <button *ngIf="!(isLoggedIn$ | async)" class="cta" (click)="onStartNow()">Start now</button>
+
+      <div *ngIf="(isLoggedIn$ | async)" class="auth-actions" role="group" aria-label="Actions account">
+        <button class="link" type="button" (click)="onProfile()">Profile</button>
+        <button class="link danger" type="button" (click)="onLogout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+</header>
