@@ -205,26 +205,3 @@
     <textarea id="moodNote" rows="3" [value]="state.moodNote" (input)="onMoodNoteInput($event)" placeholder="Add a short comment"></textarea>
   </section>
 </main>
-
-<div class="modal-overlay" [class.open]="_modal.open" (click)="closeModal($event)">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <h3>{{ _modal.title }}</h3>
-    <p>{{ _modal.label }}</p>
-    <div class="row">
-      <input
-        #num
-        type="number"
-        [step]="_modal.step"
-        [min]="_modal.min"
-        [max]="_modal.max"
-        [value]="_modal.value"
-        (keydown.enter)="confirmModal(num.value)"
-        autofocus
-      />
-    </div>
-    <div class="actions">
-      <button class="btn ghost" (click)="hideModal()">Cancel</button>
-      <button class="btn" (click)="confirmModal(num.value)">OK</button>
-    </div>
-  </div>
-</div>

@@ -24,7 +24,6 @@ type HistoryEntry = {
   mood?: number; moodNote?: string;
 };
 
-
 const LS_STATE = 'rowA';
 const LS_HISTORY = 'rowHistory';
 
@@ -60,18 +59,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
   private midnightTimer: any = null;
   private tickTimer: any = null;
 
-  _modal = {
-    open: false,
-    title: '',
-    label: '',
-    value: 0,
-    step: 1,
-    min: 0,
-    max: Number.POSITIVE_INFINITY,
-    decimals: 0,
-    onConfirm: (v:number)=>{}
-  };
-
   private onStorage = (ev: StorageEvent) => {
     if (ev.key === LS_STATE) {
       try {
@@ -90,47 +77,22 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.startTick();
 
     window.addEventListener('storage', this.onStorage);
-    window.addEventListener('keydown', this.handleEsc, { passive: true });
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.midnightTimer);
     clearInterval(this.tickTimer);
     window.removeEventListener('storage', this.onStorage);
-    window.removeEventListener('keydown', this.handleEsc);
   }
 
-  private openNumberModal(opts: {
-    title: string; label: string; value: number;
-    step?: number; min?: number; max?: number; decimals?: number;
-    onConfirm: (v:number)=>void;
-  }){
-    this._modal.open = true;
-    this._modal.title = opts.title;
-    this._modal.label = opts.label;
-    this._modal.value = opts.value;
-    this._modal.step = opts.step ?? 1;
-    this._modal.min = opts.min ?? 0;
-    this._modal.max = opts.max ?? Number.POSITIVE_INFINITY;
-    this._modal.decimals = opts.decimals ?? 0;
-    this._modal.onConfirm = opts.onConfirm;
+  private today(): string { return new Date().toISOString().slice(0,10); }
+  private offsetDate(days: number): string { const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+  private persist() { localStorage.setItem(LS_STATE, JSON.stringify(this.state)); }
+
+  pct(value: number, goal: number): number {
+    const p = (value / goal) * 100;
+    return !isFinite(p) ? 0 : Math.max(0, Math.min(100, p));
   }
-  hideModal(){ this._modal.open = false; }
-  closeModal(ev: Event){ ev.stopPropagation(); this.hideModal(); }
-  confirmModal(raw: string){
-    let v = Number(raw);
-    if (isNaN(v)) v = 0;
-    v = Math.max(this._modal.min, Math.min(this._modal.max, v));
-    if (this._modal.decimals > 0) {
-      const p = Math.pow(10, this._modal.decimals);
-      v = Math.round(v * p) / p;
-    } else {
-      v = Math.round(v);
-    }
-    this._modal.onConfirm(v);
-    this.hideModal();
-  }
-  private handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && this._modal.open) this.hideModal(); };
 
   private loadHistory(): HistoryEntry[] {
     try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch { return []; }
@@ -152,7 +114,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
       sleepGoal: this.state.sleepGoal,
       exerciseGoal: this.state.exerciseGoal,
       caloriesGoal: this.state.caloriesGoal,
-
       mood: this.state.mood,
       moodNote: this.state.moodNote
     };
@@ -172,7 +133,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.state.lastArchivedDate = archiveAsDate;
     this.persist();
   }
-
 
   private ensureDateConsistency() {
     const today = this.today();
@@ -212,14 +172,6 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.tickTimer = setInterval(compute, 1000);
   }
 
-  private today(): string { return new Date().toISOString().slice(0,10); }
-  private offsetDate(days: number): string { const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
-  private persist() { localStorage.setItem(LS_STATE, JSON.stringify(this.state)); }
-  pct(value: number, goal: number): number {
-    const p = (value / goal) * 100;
-    return !isFinite(p) ? 0 : Math.max(0, Math.min(100, p));
-  }
-
   changeGoal(key: GoalKey, delta: number){
     const current = Number(this.state[key] ?? 0);
     const next = Math.max(0, +(current + delta).toFixed(2));
@@ -227,84 +179,81 @@ export class RowAPageComponent implements OnInit, OnDestroy {
     this.state.lastUpdated = this.today();
     this.persist();
   }
+
+  private promptNumber(label: string, current: number, decimals = 0): number | null {
+    const raw = prompt(label, String(current));
+    if (raw === null) return null;
+    let v = Number(raw);
+    if (isNaN(v)) return null;
+    v = Math.max(0, v);
+    if (decimals > 0) {
+      const p = Math.pow(10, decimals);
+      v = Math.round(v * p) / p;
+    } else {
+      v = Math.round(v);
+    }
+    return v;
+  }
+
   editGoal(key: GoalKey){
     const current = Number(this.state[key] ?? 0);
     const isDecimal = key === 'waterGoal' || key === 'sleepGoal';
     const label =
-      key==='stepsGoal'    ? 'Set daily steps goal:' :
-        key==='waterGoal'    ? 'Set daily water goal (L):' :
-          key==='sleepGoal'    ? 'Set daily sleep goal (h):' :
-            key==='exerciseGoal' ? 'Set daily exercise goal (min):' :
-              'Set daily calories goal (kcal):';
+      key==='stepsGoal'     ? 'Set daily steps goal:' :
+      key==='waterGoal'     ? 'Set daily water goal (L):' :
+      key==='sleepGoal'     ? 'Set daily sleep goal (h):' :
+      key==='exerciseGoal'  ? 'Set daily exercise goal (min):' :
+                              'Set daily calories goal (kcal):';
 
-    this.openNumberModal({
-      title: 'Edit goal',
-      label,
-      value: current,
-      step: isDecimal ? 0.25 : 1,
-      decimals: isDecimal ? 2 : 0,
-      onConfirm: (v:number) => {
-        (this.state as any)[key] = v;
-        this.state.lastUpdated = this.today();
-        this.persist();
-      }
-    });
+    const v = this.promptNumber(label, current, isDecimal ? 2 : 0);
+    if (v === null) return;
+    (this.state as any)[key] = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   addSteps(a:number){ this.state.steps=Math.max(0,this.state.steps+a); this.state.lastUpdated=this.today(); this.persist(); }
   editSteps(){
-    this.openNumberModal({
-      title: 'Edit steps',
-      label: 'Set steps:',
-      value: this.state.steps,
-      step: 100,
-      onConfirm: (v)=>{ this.state.steps=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
-    });
+    const v = this.promptNumber('Set steps:', this.state.steps, 0);
+    if (v === null) return;
+    this.state.steps = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   addWater(a:number){ this.state.water=Math.max(0,+(this.state.water+a).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
   editWater(){
-    this.openNumberModal({
-      title: 'Edit water',
-      label: 'Set the amount of water (L):',
-      value: this.state.water,
-      step: 0.1,
-      decimals: 2,
-      onConfirm: (v)=>{ this.state.water=Math.max(0, +(+v).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
-    });
+    const v = this.promptNumber('Set the amount of water (L):', this.state.water, 2);
+    if (v === null) return;
+    this.state.water = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   editSleep(){
-    this.openNumberModal({
-      title: 'Edit sleep',
-      label: 'How long did you sleep? (h):',
-      value: this.state.sleep,
-      step: 0.5,
-      decimals: 2,
-      onConfirm: (v)=>{ this.state.sleep=Math.max(0, +(+v).toFixed(2)); this.state.lastUpdated=this.today(); this.persist(); }
-    });
+    const v = this.promptNumber('How long did you sleep? (h):', this.state.sleep, 2);
+    if (v === null) return;
+    this.state.sleep = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   addExercise(a:number){ this.state.exercise=Math.max(0,this.state.exercise+a); this.state.lastUpdated=this.today(); this.persist(); }
   editExercise(){
-    this.openNumberModal({
-      title: 'Edit exercises',
-      label: 'Set exercise minutes:',
-      value: this.state.exercise,
-      step: 5,
-      onConfirm: (v)=>{ this.state.exercise=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
-    });
+    const v = this.promptNumber('Set exercise minutes:', this.state.exercise, 0);
+    if (v === null) return;
+    this.state.exercise = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   addCalories(a:number){ this.state.calories=Math.max(0,this.state.calories+a); this.state.lastUpdated=this.today(); this.persist(); }
   editCalories(){
-    this.openNumberModal({
-      title: 'Edit calories',
-      label: 'Set calories (kcal):',
-      value: this.state.calories,
-      step: 50,
-      onConfirm: (v)=>{ this.state.calories=Math.max(0, Math.round(v)); this.state.lastUpdated=this.today(); this.persist(); }
-    });
+    const v = this.promptNumber('Set calories (kcal):', this.state.calories, 0);
+    if (v === null) return;
+    this.state.calories = v;
+    this.state.lastUpdated = this.today();
+    this.persist();
   }
 
   setMood(val:number){ this.state.mood = this.state.mood===val ? undefined : val; this.state.lastUpdated=this.today(); this.persist(); }

@@ -111,30 +111,3 @@
   width:100%; resize:vertical; min-height:80px; border-radius:12px; padding:10px;
   border:1px solid var(--ring); background:#f9fafb; color:var(--text);
 }
-
-:where(.daily) .modal-overlay{
-  position:fixed; inset:0; background:rgba(17,24,39,.45);
-  backdrop-filter: blur(2px);
-  display:none; align-items:center; justify-content:center;
-  z-index:1000;
-}
-:where(.daily) .modal-overlay.open{ display:flex; }
-
-:where(.daily) .modal{
-  width:min(560px,92vw);
-  background:var(--card);
-  border:1px solid var(--ring);
-  border-radius:16px;
-  box-shadow:0 20px 50px rgba(0,0,0,.22);
-  padding:16px;
-  animation:modalIn .16s ease-out;
-}
-@keyframes modalIn{ from{transform:translateY(6px);opacity:.8} to{transform:translateY(0);opacity:1} }
-:where(.daily) .modal h3{ margin:0 0 4px; font-size:18px; }
-:where(.daily) .modal p{ margin:0 0 12px; color:var(--muted); }
-:where(.daily) .modal .row{ display:flex; gap:10px; align-items:center; }
-:where(.daily) .modal input[type="number"]{
-  flex:1 1 auto; padding:10px 12px; border-radius:10px;
-  border:1px solid var(--ring); background:#f9fafb; font-size:16px;
-}
-:where(.daily) .modal .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
