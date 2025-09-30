@@ -46,9 +46,21 @@ export class AuthService {
     }
   }
 
-  logout(): void {
-    window.location.href = '/logout';
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${this.API}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'manual' as RequestRedirect,
+        cache: 'no-store'
+      });
+    } catch {
+    } finally {
+      this.clearUiState();
+      window.location.href = '/auth/logout';
+    }
   }
+
 
   markLoggedIn(): void {
     this.isLoggedIn$.next(true);
