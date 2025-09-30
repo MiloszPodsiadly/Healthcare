@@ -1,80 +1,3 @@
-<header class="nav">
-  <div class="container">
-    <div class="nav-left">
-      <a class="brand" routerLink="/" aria-label="CareHub">
-        <span class="dot" aria-hidden="true"></span>
-        <span>Healthcare Poland</span>
-      </a>
-
-      <nav class="sections" *ngIf="isLoggedIn" aria-label="Sekcje">
-        <!-- Section A -->
-        <div class="dd" aria-haspopup="true">
-          <button class="dd-toggle" aria-expanded="false">My health</button>
-          <ul class="dd-menu">
-            <li><a routerLink="/section-a/row-a" routerLinkActive="active">Daily Preview</a></li>
-            <li><a routerLink="/section-a/row-b" routerLinkActive="active">Training exercises</a></li>
-            <li><a routerLink="/section-a/row-c" routerLinkActive="active">History</a></li>
-            <li><a routerLink="/section-a/row-d" routerLinkActive="active">Row 4</a></li>
-            <li><a routerLink="/section-a/row-e" routerLinkActive="active">Row 5</a></li>
-          </ul>
-        </div>
-
-        <!-- Section B-->
-        <div class="dd" aria-haspopup="true">
-          <button class="dd-toggle" aria-expanded="false">Section B</button>
-          <ul class="dd-menu">
-            <li><a routerLink="/section-b/row-a" routerLinkActive="active">Row 1</a></li>
-            <li><a routerLink="/section-b/row-b" routerLinkActive="active">Row 2</a></li>
-            <li><a routerLink="/section-b/row-c" routerLinkActive="active">Row 3</a></li>
-            <li><a routerLink="/section-b/row-d" routerLinkActive="active">Row 4</a></li>
-            <li><a routerLink="/section-b/row-e" routerLinkActive="active">Row 5</a></li>
-          </ul>
-        </div>
-
-        <!-- Section C -->
-        <div class="dd" aria-haspopup="true">
-          <button class="dd-toggle" aria-expanded="false">Section C</button>
-          <ul class="dd-menu">
-            <li><a routerLink="/section-c/row-a" routerLinkActive="active">Row 1</a></li>
-            <li><a routerLink="/section-c/row-b" routerLinkActive="active">Row 2</a></li>
-            <li><a routerLink="/section-c/row-c" routerLinkActive="active">Row 3</a></li>
-            <li><a routerLink="/section-c/row-d" routerLinkActive="active">Row 4</a></li>
-            <li><a routerLink="/section-c/row-e" routerLinkActive="active">Row 5</a></li>
-          </ul>
-        </div>
-
-        <!-- Section D -->
-        <div class="dd" aria-haspopup="true">
-          <button class="dd-toggle" aria-expanded="false">Section D</button>
-          <ul class="dd-menu">
-            <li><a routerLink="/section-d/row-a" routerLinkActive="active">Row 1</a></li>
-            <li><a routerLink="/section-d/row-b" routerLinkActive="active">Row 2</a></li>
-            <li><a routerLink="/section-d/row-c" routerLinkActive="active">Row 3</a></li>
-            <li><a routerLink="/section-d/row-d" routerLinkActive="active">Row 4</a></li>
-            <li><a routerLink="/section-d/row-e" routerLinkActive="active">Row 5</a></li>
-          </ul>
-        </div>
-      </nav>
-    </div>
-
-    <div class="nav-right">
-      <nav class="links" aria-label="Main navigation">
-        <a href="#streams">Value Streams</a>
-        <a href="#about">About Project</a>
-        <a href="#contact">Contact</a>
-      </nav>
-
-      <button *ngIf="!isLoggedIn" class="cta" (click)="toggleLogin()">Start now</button>
-
-      <div *ngIf="isLoggedIn" class="auth-actions" role="group" aria-label="Acctions account">
-        <button class="link" type="button" (click)="openProfile()">Profile</button>
-        <button class="link danger" type="button" (click)="logout()">Log Out</button>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- HERO -->
 <section class="hero" id="login" role="banner" aria-label="Login screen">
   <div class="login-actions" *ngIf="showLogin && !isLoggedIn" role="group" aria-label="Login">
     <a class="btn btn-sm outline" href="/oauth2/authorization/github" aria-label="Login via GitHub" (click)="persistIntent()">
@@ -117,7 +40,6 @@
   </div>
 </section>
 
-<!-- About Project -->
 <section id="about" class="about">
   <div class="container">
     <h2>About Project <span class="accent">CareHub</span></h2>
@@ -146,7 +68,6 @@
   </div>
 </section>
 
-<!-- Value Streams -->
 <section id="streams" class="streams">
   <div class="container">
     <h2>Value Streams</h2>
@@ -159,7 +80,6 @@
   </div>
 </section>
 
-<!-- Stopka -->
 <footer id="contact" class="footer">
   <div class="container">
     <p>© {{ currentYear }} CareHub • Demo version</p>
