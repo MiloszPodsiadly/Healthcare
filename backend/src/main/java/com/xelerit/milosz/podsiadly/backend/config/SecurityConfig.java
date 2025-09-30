@@ -56,7 +56,7 @@ public class SecurityConfig {
         );
 
         http.logout(logout -> logout
-                .logoutUrl("/logout")
+                .logoutUrl("/api/logout")
                 .logoutSuccessHandler(logoutSuccessHandler())
         );
 
